@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Spodni 3D stin zakladny v bezpecne zone 66x66 -->
+    <path
+        android:fillColor="#40000000"
+        android:pathData="M36,81a18,3.5 0,1 0,36 0a18,3.5 0,1 0,-36 0z" />
+
+    <!-- Vnejsi 3D signalove vlny (vlevo a vpravo) -->
+    <path
+        android:strokeWidth="3.2"
+        android:strokeLineCap="round"
+        android:strokeColor="#2DD4BF"
+        android:fillColor="#00000000"
+        android:pathData="M32,27 C24,35 24,47 32,55" />
+    <path
+        android:strokeWidth="3.2"
+        android:strokeLineCap="round"
+        android:strokeColor="#2DD4BF"
+        android:fillColor="#00000000"
+        android:pathData="M76,27 C84,35 84,47 76,55" />
+
+    <!--Vnitrni 3D signalove vlny -->
+    <path
+        android:strokeWidth="3.6"
+        android:strokeLineCap="round"
+        android:strokeColor="#38BDF8"
+        android:fillColor="#00000000"
+        android:pathData="M39,32 C34,37 34,45 39,50" />
+    <path
+        android:strokeWidth="3.6"
+        android:strokeLineCap="round"
+        android:strokeColor="#38BDF8"
+        android:fillColor="#00000000"
+        android:pathData="M69,32 C74,37 74,45 69,50" />
+
+    <!-- 3D kovovy stozar - leva osvetlena strana -->
+    <path android:pathData="M54,43 L41,80 L47,80 L54,54 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="41"
+                android:startY="43"
+                android:endX="54"
+                android:endY="80"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#F8FAFC" />
+                <item android:offset="1.0" android:color="#94A3B8" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- 3D kovovy stozar - prava stinovana strana -->
+    <path android:pathData="M54,43 L67,80 L61,80 L54,54 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="54"
+                android:startY="43"
+                android:endX="67"
+                android:endY="80"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#CBD5E1" />
+                <item android:offset="1.0" android:color="#475569" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Pricky stozaru a zakladna -->
+    <path
+        android:strokeWidth="2.4"
+        android:strokeLineCap="round"
+        android:strokeColor="#E2E8F0"
+        android:pathData="M48,61 L60,61 M45,71 L63,71 M38,80 L70,80" />
+
+    <!-- 3D zarici jadro vysilace nahore -->
+    <path android:pathData="M54,41m-7.5,0a7.5,7.5 0,1 1,15 0a7.5,7.5 0,1 1,-15 0">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:centerX="51.5"
+                android:centerY="38.5"
+                android:gradientRadius="10"
+                android:type="radial">
+                <item android:offset="0.0" android:color="#FFFFFF" />
+                <item android:offset="0.35" android:color="#00F5D4" />
+                <item android:offset="1.0" android:color="#0284C7" />
+            </gradient>
+        </aapt:attr>
+    </path>
+</vector>
