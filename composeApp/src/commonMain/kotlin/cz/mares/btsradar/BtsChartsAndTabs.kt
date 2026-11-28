@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -76,7 +77,7 @@ fun LiveSignalTab(
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
-                Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
                         text = "Načítám data z modemu...",
                         style = MaterialTheme.typography.titleMedium,
@@ -88,10 +89,11 @@ fun LiveSignalTab(
                     )
                     OutlinedButton(
                         onClick = { controller.refreshNow() },
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                         modifier = Modifier.heightIn(min = 48.dp),
                         shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text("Zkusit načíst znovu")
+                        Text("Zkusit načíst znovu", maxLines = 1, softWrap = false)
                     }
                 }
             }
@@ -100,7 +102,6 @@ fun LiveSignalTab(
             val sigColor = signalColorFor(quality)
             val progress = ((primary.rsrpDbm + 130).toFloat() / 65f).coerceIn(0.04f, 1f)
 
-            // Hlavni karta sily signalu
             Card(
                 shape = RoundedCornerShape(22.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -111,14 +112,15 @@ fun LiveSignalTab(
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = primary.operatorName,
                                 style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.ExtraBold
+                                fontWeight = FontWeight.ExtraBold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                             Text(
                                 text = "PLMN ${primary.mcc}-${primary.mnc.padStart(2, '0')} • SIM ${primary.simSlot} • ${state.dataStateLabel}",
@@ -126,6 +128,7 @@ fun LiveSignalTab(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
+                        Spacer(modifier = Modifier.width(8.dp))
                         Surface(
                             color = sigColor.copy(alpha = 0.18f),
                             shape = RoundedCornerShape(14.dp)
@@ -135,6 +138,8 @@ fun LiveSignalTab(
                                 color = sigColor,
                                 fontWeight = FontWeight.Bold,
                                 style = MaterialTheme.typography.labelLarge,
+                                maxLines = 1,
+                                softWrap = false,
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                             )
                         }
@@ -142,38 +147,50 @@ fun LiveSignalTab(
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.Bottom,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        verticalAlignment = Alignment.Bottom
                     ) {
                         Row(verticalAlignment = Alignment.Bottom) {
                             Text(
                                 text = "${primary.rsrpDbm}",
-                                fontSize = 44.sp,
+                                fontSize = 40.sp,
                                 fontWeight = FontWeight.Black,
-                                color = sigColor
+                                color = sigColor,
+                                maxLines = 1,
+                                softWrap = false
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = "dBm (${if (primary.tech == RadioTech.NR_5G) "SS-RSRP" else "RSRP"})",
+                                text = "dBm",
                                 style = MaterialTheme.typography.labelLarge,
-                                modifier = Modifier.padding(bottom = 8.dp)
+                                maxLines = 1,
+                                softWrap = false,
+                                modifier = Modifier.padding(bottom = 7.dp)
                             )
                         }
-                        Column(horizontalAlignment = Alignment.End) {
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            horizontalAlignment = Alignment.End
+                        ) {
                             Text(
                                 text = primary.bandInfo.bandName,
                                 style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.End,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
                             )
                             Text(
                                 text = "${primary.bandInfo.bandCode} • ${BandCalculator.formatFreqMhz(primary.bandInfo.frequencyMhz)}",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.primary,
+                                textAlign = TextAlign.End,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                     }
 
-                    // Barevna stupnice dBm
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -190,28 +207,34 @@ fun LiveSignalTab(
                         )
                     }
 
+                    // Prehledna mrizka 2x2 misto 4 uzkych sloupcu
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         MetricMiniBox(
-                            title = "RSRQ",
-                            value = primary.rsrqDb?.let { "$it dB" } ?: "---",
+                            title = "RSRQ (kvalita)",
+                            value = primary.rsrqDb?.let { "$it\u00A0dB" } ?: "---",
                             modifier = Modifier.weight(1f)
                         )
                         MetricMiniBox(
-                            title = "SINR",
-                            value = primary.sinrDb?.let { "$it dB" } ?: "---",
+                            title = "SINR (odstup šumu)",
+                            value = primary.sinrDb?.let { "$it\u00A0dB" } ?: "---",
                             modifier = Modifier.weight(1f)
                         )
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
                         MetricMiniBox(
                             title = "RSSI / ASU",
-                            value = primary.rssiDbm?.let { "$it dBm" } ?: "${primary.asuLevel} ASU",
+                            value = primary.rssiDbm?.let { "$it\u00A0dBm" } ?: "${primary.asuLevel}\u00A0ASU",
                             modifier = Modifier.weight(1f)
                         )
                         MetricMiniBox(
-                            title = "Ping",
-                            value = state.pingMs?.let { "$it ms" } ?: "---",
+                            title = "Ping (klepni)",
+                            value = state.pingMs?.let { "$it\u00A0ms" } ?: "---",
                             modifier = Modifier
                                 .weight(1f)
                                 .clickable { controller.measurePingNow() }
@@ -220,7 +243,6 @@ fun LiveSignalTab(
                 }
             }
 
-            // Inzenyrske parametry BTS vysilace
             if (idSource != null) {
                 Card(
                     shape = RoundedCornerShape(20.dp),
@@ -236,35 +258,34 @@ fun LiveSignalTab(
                             fontWeight = FontWeight.Bold
                         )
 
-                        val bwText = if (idSource.bandwidthKhz >= 1000) "${idSource.bandwidthKhz / 1000} MHz" else "---"
+                        val bwText = if (idSource.bandwidthKhz >= 1000) "${idSource.bandwidthKhz / 1000}\u00A0MHz" else "---"
                         val taText = if (idSource.timingAdvance != null && idSource.taDistanceMeters != null) {
-                            "TA ${idSource.timingAdvance} (~${idSource.taDistanceMeters} m)"
+                            "TA ${idSource.timingAdvance} (~${idSource.taDistanceMeters}\u00A0m)"
                         } else {
                             "Neaktivní (klid dat)"
                         }
 
                         InfoRow("Číslo vysílače (eNB / gNB)", if (idSource.enbOrGnbId > 0L) "${idSource.enbOrGnbId}" else "---")
-                        InfoRow("Sektor / Cell ID (ECI)", "Sektor ${idSource.sectorId}  •  CID ${idSource.cellId}")
-                        InfoRow("Oblast (TAC / LAC) & PCI", "TAC ${idSource.tacOrLac}  •  PCI ${idSource.pciOrPsc}")
+                        InfoRow("Sektor / Cell ID", "Sektor ${idSource.sectorId} • CID ${idSource.cellId}")
+                        InfoRow("TAC / LAC & PCI", "TAC ${idSource.tacOrLac} • PCI ${idSource.pciOrPsc}")
                         InfoRow("Kanál & Duplex", "${idSource.bandInfo.channelLabel} (${idSource.bandInfo.duplexMode})")
-                        InfoRow("Šířka kanálu / CQI", "$bwText  •  CQI ${idSource.cqi?.toString() ?: "---"}")
-                        InfoRow("Timing Advance (rádio)", taText)
+                        InfoRow("Šířka kanálu / CQI", "$bwText • CQI ${idSource.cqi?.toString() ?: "---"}")
+                        InfoRow("Timing Advance", taText)
 
                         val tower = state.activeTowerLocation
                         if (tower != null) {
                             HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
-                            InfoRow("Lokalita BTS (${tower.source})", tower.siteName)
+                            InfoRow("Lokalita BTS", "${tower.siteName} (${tower.source})")
                             val distStr = state.distanceToTowerMeters?.let { d ->
                                 val brg = state.bearingToTowerDeg
-                                if (brg != null) "$d m (${BandCalculator.compassLabel(brg)} $brg°)" else "$d m"
+                                if (brg != null) "$d\u00A0m (${BandCalculator.compassLabel(brg)} $brg°)" else "$d\u00A0m"
                             } ?: "---"
-                            InfoRow("Vzdušná vzdálenost & směr", distStr)
+                            InfoRow("Vzdálenost & směr", distStr)
                         }
                     }
                 }
             }
 
-            // Agregace pasem / 5G NSA kotva
             if (state.servingCells.size > 1) {
                 Card(
                     shape = RoundedCornerShape(20.dp),
@@ -282,17 +303,20 @@ fun LiveSignalTab(
                         state.servingCells.forEach { sc ->
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
                                     text = "${sc.tech.shortLabel} • ${sc.bandInfo.bandCode} (${BandCalculator.formatFreqMhz(sc.bandInfo.frequencyMhz)}) • PCI ${sc.pciOrPsc}",
                                     style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.Medium
+                                    fontWeight = FontWeight.Medium,
+                                    modifier = Modifier.weight(1f)
                                 )
+                                Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "${sc.rsrpDbm} dBm",
+                                    text = "${sc.rsrpDbm}\u00A0dBm",
                                     fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    softWrap = false,
                                     color = signalColorFor(BandCalculator.evaluateQuality(sc.rsrpDbm, sc.tech))
                                 )
                             }
@@ -301,7 +325,6 @@ fun LiveSignalTab(
                 }
             }
 
-            // Zivy 60s graf signalu
             SignalHistoryChartCard(samples = state.historySamples)
         }
 
@@ -323,52 +346,55 @@ private fun SignalHistoryChartCard(samples: List<SignalSample>) {
             val maxDbm = samples.maxOfOrNull { it.rsrpDbm }
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Vývoj signálu (posledních 60 vzorků)",
+                    text = "Vývoj signálu (60 vzorků)",
                     style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f)
                 )
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = if (minDbm != null && maxDbm != null) "$minDbm až $maxDbm dBm" else "---",
+                    text = if (minDbm != null && maxDbm != null) "$minDbm až $maxDbm\u00A0dBm" else "---",
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1,
+                    softWrap = false
                 )
             }
 
             val lineColor = MaterialTheme.colorScheme.primary
-            val gridColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f)
+            val gridColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.22f)
 
             Canvas(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(130.dp)
+                    .height(132.dp)
             ) {
-                val w = size.width
-                val h = size.height
-                val topDbm = -60f
-                val bottomDbm = -125f
+                val padY = 8.dp.toPx()
+                val usableH = (size.height - padY * 2f).coerceAtLeast(10f)
+                val topDbm = -45f
+                val bottomDbm = -130f
                 val span = topDbm - bottomDbm
 
-                listOf(-75f, -95f, -110f).forEach { ref ->
-                    val y = ((topDbm - ref) / span) * h
+                listOf(-65f, -90f, -115f).forEach { ref ->
+                    val y = padY + ((topDbm - ref) / span) * usableH
                     drawLine(
                         color = gridColor,
                         start = Offset(0f, y),
-                        end = Offset(w, y),
+                        end = Offset(size.width, y),
                         strokeWidth = 1.5f
                     )
                 }
 
                 if (samples.size >= 2) {
                     val path = Path()
-                    val stepX = w / (samples.size - 1).coerceAtLeast(1)
+                    val stepX = size.width / (samples.size - 1).coerceAtLeast(1)
                     samples.forEachIndexed { idx, s ->
                         val clamped = s.rsrpDbm.toFloat().coerceIn(bottomDbm, topDbm)
                         val x = idx * stepX
-                        val y = ((topDbm - clamped) / span) * h
+                        val y = padY + ((topDbm - clamped) / span) * usableH
                         if (idx == 0) path.moveTo(x, y) else path.lineTo(x, y)
                     }
                     drawPath(
@@ -383,9 +409,9 @@ private fun SignalHistoryChartCard(samples: List<SignalSample>) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("-60 dBm (silný)", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text("-95 dBm (střední)", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text("-125 dBm (slabý)", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("-50\u00A0dBm", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, softWrap = false)
+                Text("-90\u00A0dBm", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, softWrap = false)
+                Text("-125\u00A0dBm", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, softWrap = false)
             }
         }
     }
@@ -402,7 +428,7 @@ fun NeighborsTab(state: BtsRadarState) {
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Text(
-            text = "Okolní buňky a sektory v dosahu (${state.neighborCells.size})",
+            text = "Okolní buňky v dosahu (${state.neighborCells.size})",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
@@ -430,7 +456,6 @@ fun NeighborsTab(state: BtsRadarState) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(14.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
@@ -452,18 +477,23 @@ fun NeighborsTab(state: BtsRadarState) {
                                 )
                             }
                         }
+                        Spacer(modifier = Modifier.width(10.dp))
                         Column(horizontalAlignment = Alignment.End) {
                             Text(
-                                text = "${cell.rsrpDbm} dBm",
+                                text = "${cell.rsrpDbm}\u00A0dBm",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.ExtraBold,
-                                color = col
+                                color = col,
+                                maxLines = 1,
+                                softWrap = false
                             )
                             cell.rsrqDb?.let {
                                 Text(
-                                    text = "RSRQ $it dB",
+                                    text = "RSRQ $it\u00A0dB",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    softWrap = false
                                 )
                             }
                         }
@@ -520,7 +550,7 @@ fun MapAndDbTab(
                 InfoRow(
                     "Moje GPS",
                     "${BandCalculator.formatCoord(state.userLat)}, ${BandCalculator.formatCoord(state.userLon)}" +
-                        (state.userAccuracyMeters?.let { " (±$it m)" } ?: "")
+                        (state.userAccuracyMeters?.let { " (±$it\u00A0m)" } ?: "")
                 )
 
                 val tower = state.activeTowerLocation
@@ -530,7 +560,7 @@ fun MapAndDbTab(
                     InfoRow("GPS BTS", "${BandCalculator.formatCoord(tower.lat)}, ${BandCalculator.formatCoord(tower.lon)}")
                     val distStr = state.distanceToTowerMeters?.let { d ->
                         val brg = state.bearingToTowerDeg
-                        if (brg != null) "$d m • směr ${BandCalculator.compassLabel(brg)} ($brg°)" else "$d m"
+                        if (brg != null) "$d\u00A0m • směr ${BandCalculator.compassLabel(brg)} ($brg°)" else "$d\u00A0m"
                     } ?: "---"
                     InfoRow("Vzdálenost", distStr)
                     tower.azimuthDeg?.let { az ->
@@ -539,12 +569,13 @@ fun MapAndDbTab(
 
                     OutlinedButton(
                         onClick = { controller.openTowerInExternalMap() },
+                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(min = 48.dp),
                         shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text("Otevřít vysílač v externí mapě")
+                        Text("Otevřít v externí mapě", maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis)
                     }
                 } else {
                     Text(
@@ -570,7 +601,7 @@ fun MapAndDbTab(
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Načteno v paměti: ${state.importedCsvCount} sektorů (podporuje CLF v3.0 i CSV se středníky/čárkami).",
+                    text = "Načteno v paměti: ${state.importedCsvCount} sektorů (CLF v3.0 i CSV).",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -580,20 +611,22 @@ fun MapAndDbTab(
                 ) {
                     Button(
                         onClick = { controller.openCsvImportPicker() },
+                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
                         modifier = Modifier
                             .weight(1f)
                             .heightIn(min = 48.dp),
                         shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text("Nahrát CSV / CLF")
+                        Text("Nahrát CSV / CLF", maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis)
                     }
                     if (state.importedCsvCount > 0) {
                         OutlinedButton(
                             onClick = { controller.clearImportedCsv() },
+                            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
                             modifier = Modifier.heightIn(min = 48.dp),
                             shape = RoundedCornerShape(16.dp)
                         ) {
-                            Text("Smazat")
+                            Text("Smazat", maxLines = 1, softWrap = false)
                         }
                     }
                 }
@@ -614,12 +647,13 @@ fun MapAndDbTab(
                 )
                 OutlinedButton(
                     onClick = { controller.saveOpenCellIdKey(apiKeyDraft) },
+                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(min = 48.dp),
                     shape = RoundedCornerShape(16.dp)
                 ) {
-                    Text("Uložit API klíč")
+                    Text("Uložit API klíč", maxLines = 1, softWrap = false)
                 }
             }
         }
@@ -651,19 +685,22 @@ fun RouteLogTab(
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = "Zachycené BTS po trase (${state.routeLog.size})",
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f)
                     )
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = state.userSpeedKmh?.let { "$it km/h" } ?: "0 km/h",
+                        text = state.userSpeedKmh?.let { "$it\u00A0km/h" } ?: "0\u00A0km/h",
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        softWrap = false
                     )
                 }
 
@@ -673,19 +710,21 @@ fun RouteLogTab(
                 ) {
                     Button(
                         onClick = { controller.exportRouteLogCsv() },
+                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
                         modifier = Modifier
                             .weight(1f)
                             .heightIn(min = 48.dp),
                         shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text("Exportovat do CSV")
+                        Text("Export do CSV", maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis)
                     }
                     OutlinedButton(
                         onClick = { controller.clearRouteLog() },
+                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
                         modifier = Modifier.heightIn(min = 48.dp),
                         shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text("Vymazat")
+                        Text("Vymazat", maxLines = 1, softWrap = false)
                     }
                 }
             }
@@ -702,18 +741,22 @@ fun RouteLogTab(
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "${item.techLabel} • eNB ${item.enbId} (sektor ${item.sectorId})",
+                            text = "${item.techLabel} • eNB ${item.enbId} (s.${item.sectorId})",
                             style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.weight(1f)
                         )
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Max ${item.bestRsrpDbm} dBm",
+                            text = "Max ${item.bestRsrpDbm}\u00A0dBm",
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 1,
+                            softWrap = false
                         )
                     }
                     Text(
@@ -723,13 +766,13 @@ fun RouteLogTab(
                     )
                     if (item.towerSiteName.isNotBlank()) {
                         Text(
-                            text = "BTS: ${item.towerSiteName}" + (item.distanceMeters?.let { " ($it m)" } ?: ""),
+                            text = "BTS: ${item.towerSiteName}" + (item.distanceMeters?.let { " ($it\u00A0m)" } ?: ""),
                             style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.Medium
                         )
                     }
                     Text(
-                        text = "Čas ${item.firstSeenText} – ${item.lastSeenText} (${item.samplesCount}×)",
+                        text = "Čas ${item.firstSeenText} až ${item.lastSeenText} (${item.samplesCount}×)",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -753,14 +796,16 @@ private fun MetricMiniBox(
         color = MaterialTheme.colorScheme.surface
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp),
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Ellipsis
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
@@ -768,6 +813,7 @@ private fun MetricMiniBox(
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
+                softWrap = false,
                 overflow = TextOverflow.Ellipsis
             )
         }
@@ -778,7 +824,6 @@ private fun MetricMiniBox(
 private fun InfoRow(label: String, value: String) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Top
     ) {
         Text(
@@ -787,10 +832,12 @@ private fun InfoRow(label: String, value: String) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.weight(0.44f)
         )
+        Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.End,
             modifier = Modifier.weight(0.56f)
         )
     }
@@ -809,49 +856,5 @@ fun FooterCopyright() {
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-    }
-}
-
-@Composable
-fun RadarTabIcon(index: Int, tint: Color) {
-    Canvas(modifier = Modifier.size(22.dp)) {
-        val w = size.width
-        val h = size.height
-        val stroke = Stroke(width = 2.4f * density, cap = StrokeCap.Round)
-        when (index) {
-            0 -> {
-                // Carky signalu
-                val bars = listOf(0.32f, 0.54f, 0.76f, 1.0f)
-                bars.forEachIndexed { i, ratio ->
-                    val x = w * (0.16f + i * 0.22f)
-                    drawLine(tint, Offset(x, h * 0.9f), Offset(x, h * (0.9f - 0.75f * ratio)), strokeWidth = 3f * density, cap = StrokeCap.Round)
-                }
-            }
-            1 -> {
-                // Radar okolnich bunek
-                drawCircle(tint, radius = w * 0.42f, style = stroke)
-                drawCircle(tint, radius = w * 0.16f)
-            }
-            2 -> {
-                // Mapa a stozar
-                val p = Path().apply {
-                    moveTo(w * 0.5f, h * 0.12f)
-                    lineTo(w * 0.2f, h * 0.88f)
-                    moveTo(w * 0.5f, h * 0.12f)
-                    lineTo(w * 0.8f, h * 0.88f)
-                    moveTo(w * 0.32f, h * 0.6f)
-                    lineTo(w * 0.68f, h * 0.6f)
-                }
-                drawPath(p, tint, style = stroke)
-                drawCircle(tint, radius = w * 0.12f, center = Offset(w * 0.5f, h * 0.15f))
-            }
-            else -> {
-                // Zaznam trasy
-                for (i in 0..2) {
-                    val y = h * (0.24f + i * 0.26f)
-                    drawLine(tint, Offset(w * 0.15f, y), Offset(w * 0.88f, y), strokeWidth = 2.5f * density, cap = StrokeCap.Round)
-                }
-            }
-        }
     }
 }

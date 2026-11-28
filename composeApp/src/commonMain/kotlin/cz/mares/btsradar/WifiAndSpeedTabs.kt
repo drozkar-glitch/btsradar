@@ -67,19 +67,18 @@ fun WifiAndZigbeeTab(
             .padding(horizontal = 16.dp, vertical = 10.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Prepinac 3 podsekci Wi-Fi & Zigbee
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             SubTabPill(
-                title = "Aktivní & Mesh",
+                title = "Aktivní",
                 selected = subSection == 0,
                 onClick = { subSection = 0 },
                 modifier = Modifier.weight(1f)
             )
             SubTabPill(
-                title = "Zigbee 11–26",
+                title = "Zigbee",
                 selected = subSection == 1,
                 onClick = { subSection = 1 },
                 modifier = Modifier.weight(1f)
@@ -141,16 +140,17 @@ private fun ActiveWifiMeshSection(
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Telefon momentálně není spojen s žádným Wi-Fi přístupovým bodem. Můžeš ale přejít do záložky Zigbee 11–26 nebo Skener a měřit okolní spektrum.",
+                    text = "Telefon momentálně není spojen s žádným Wi-Fi přístupovým bodem. Můžeš ale přejít do záložky Zigbee nebo Skener a měřit okolní spektrum.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Button(
                     onClick = { controller.triggerWifiScan() },
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                     modifier = Modifier.heightIn(min = 48.dp),
                     shape = RoundedCornerShape(16.dp)
                 ) {
-                    Text("Skenovat okolní Wi-Fi")
+                    Text("Skenovat okolní Wi-Fi", maxLines = 1, softWrap = false)
                 }
             }
         }
@@ -173,14 +173,15 @@ private fun ActiveWifiMeshSection(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = wifi.ssid,
                         style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.ExtraBold
+                        fontWeight = FontWeight.ExtraBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     val nodeTitle = if (wifi.customAlias.isNotBlank()) {
                         "${wifi.customAlias} (${wifi.bssid})"
@@ -191,52 +192,70 @@ private fun ActiveWifiMeshSection(
                         text = nodeTitle,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
+                Spacer(modifier = Modifier.width(8.dp))
                 Surface(
                     color = sigColor.copy(alpha = 0.18f),
                     shape = RoundedCornerShape(14.dp)
                 ) {
                     Text(
-                        text = "${quality.label} (${wifi.signalPercent} %)",
+                        text = "${wifi.signalPercent}\u00A0% • ${quality.label}",
                         color = sigColor,
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.labelLarge,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        maxLines = 1,
+                        softWrap = false,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
                     )
                 }
             }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Bottom
             ) {
                 Row(verticalAlignment = Alignment.Bottom) {
                     Text(
                         text = "${wifi.rssiDbm}",
-                        fontSize = 44.sp,
+                        fontSize = 40.sp,
                         fontWeight = FontWeight.Black,
-                        color = sigColor
+                        color = sigColor,
+                        maxLines = 1,
+                        softWrap = false
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "dBm (RSSI)",
+                        text = "dBm",
                         style = MaterialTheme.typography.labelLarge,
-                        modifier = Modifier.padding(bottom = 8.dp)
+                        maxLines = 1,
+                        softWrap = false,
+                        modifier = Modifier.padding(bottom = 7.dp)
                     )
                 }
-                Column(horizontalAlignment = Alignment.End) {
+                Spacer(modifier = Modifier.width(10.dp))
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.End
+                ) {
                     Text(
                         text = wifi.standardLabel,
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.End,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = "${wifi.band.label} • Kanál ${wifi.channelNumber} (${wifi.channelWidthMhz} MHz)",
+                        text = "${wifi.band.shortLabel} • K${wifi.channelNumber} (${wifi.channelWidthMhz}\u00A0MHz)",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.End,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
@@ -257,27 +276,33 @@ private fun ActiveWifiMeshSection(
                 )
             }
 
+            // Prehledna mrizka 2x2 misto 4 uzkych sloupcu
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 WifiMetricBox(
-                    title = "TX Link",
-                    value = "${wifi.txLinkSpeedMbps ?: wifi.linkSpeedMbps} Mbps",
+                    title = "TX rychlost linky",
+                    value = "${wifi.txLinkSpeedMbps ?: wifi.linkSpeedMbps}\u00A0Mbps",
                     modifier = Modifier.weight(1f)
                 )
                 WifiMetricBox(
-                    title = "RX Link",
-                    value = wifi.rxLinkSpeedMbps?.let { "$it Mbps" } ?: "${wifi.linkSpeedMbps} Mbps",
+                    title = "RX rychlost linky",
+                    value = "${wifi.rxLinkSpeedMbps ?: wifi.linkSpeedMbps}\u00A0Mbps",
                     modifier = Modifier.weight(1f)
                 )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 WifiMetricBox(
                     title = "Frekvence",
-                    value = "${wifi.frequencyMhz} MHz",
+                    value = "${wifi.frequencyMhz}\u00A0MHz",
                     modifier = Modifier.weight(1f)
                 )
                 WifiMetricBox(
-                    title = "Šifrování",
+                    title = "Zabezpečení",
                     value = wifi.securityLabel,
                     modifier = Modifier.weight(1f)
                 )
@@ -285,7 +310,7 @@ private fun ActiveWifiMeshSection(
         }
     }
 
-    // Wi-Fi 7 MLO linky (pokud AP i telefon jedou Multi-Link)
+    // Wi-Fi 7 MLO linky
     if (wifi.mloLinks.isNotEmpty()) {
         Card(
             shape = RoundedCornerShape(20.dp),
@@ -310,19 +335,22 @@ private fun ActiveWifiMeshSection(
                 wifi.mloLinks.forEach { link ->
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = "${link.bandLabel} • K${link.channel} (${if (link.isActive) "aktivní" else "záložní"})",
                             style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.weight(1f)
                         )
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "${link.rssiDbm} dBm • ${link.txMbps ?: "---"} Mbps",
+                            text = "${link.rssiDbm}\u00A0dBm • ${link.txMbps ?: "---"}\u00A0Mbps",
                             style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 1,
+                            softWrap = false
                         )
                     }
                 }
@@ -340,20 +368,20 @@ private fun ActiveWifiMeshSection(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "Síťové rozhraní a identifikace Mesh uzlu",
+                text = "Síťové rozhraní a Mesh uzel",
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold
             )
             WifiInfoRow("Lokální IPv4", wifi.ipv4Address)
-            WifiInfoRow("Výchozí brána (Router)", wifi.gatewayIp)
+            WifiInfoRow("Výchozí brána", wifi.gatewayIp)
             WifiInfoRow("DNS servery", wifi.dnsServers)
             WifiInfoRow("IPv6 adresa", wifi.ipv6Address)
-            WifiInfoRow("Rozhraní / Max PHY", "${wifi.interfaceName} • max ${wifi.maxRxMbps ?: wifi.linkSpeedMbps} Mbps")
+            WifiInfoRow("Rozhraní / Max PHY", "${wifi.interfaceName} • max ${wifi.maxRxMbps ?: wifi.linkSpeedMbps}\u00A0Mbps")
 
             if (wifi.bssid.length == 17) {
                 HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
                 Text(
-                    text = "Vlastní název této jednotky (${wifi.bssid})",
+                    text = "Vlastní název jednotky (${wifi.bssid})",
                     style = MaterialTheme.typography.labelLarge
                 )
                 Row(
@@ -364,52 +392,55 @@ private fun ActiveWifiMeshSection(
                     OutlinedTextField(
                         value = aliasDraft,
                         onValueChange = { aliasDraft = it },
-                        placeholder = { Text("např. Deco Obývák / Chodba") },
+                        placeholder = { Text("např. Deco Obývák") },
                         singleLine = true,
                         shape = RoundedCornerShape(14.dp),
                         modifier = Modifier.weight(1f)
                     )
                     Button(
                         onClick = { controller.saveBssidAlias(wifi.bssid, aliasDraft) },
+                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 12.dp),
                         modifier = Modifier.heightIn(min = 52.dp),
                         shape = RoundedCornerShape(14.dp)
                     ) {
-                        Text("Uložit")
+                        Text("Uložit", maxLines = 1, softWrap = false)
                     }
                 }
             }
         }
     }
 
-    // 60s graf kolisani Wi-Fi signalu
+    // 60s graf kolisani Wi-Fi signalu (opraveny strop -20 dBm a nesrazeny nadpis)
     WifiRssiChartCard(samples = state.wifiHistory)
 
-    // Log prepinani Mesh uzlu (Roaming)
+    // Log prepinani Mesh uzlu (Roaming) - opraveny radek s tlacitkem Smazat
     Card(
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = "Mesh Roaming a přeladění (${state.roamEvents.size})",
                     style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f)
                 )
                 if (state.roamEvents.isNotEmpty()) {
+                    Spacer(modifier = Modifier.width(8.dp))
                     OutlinedButton(
                         onClick = { controller.clearRoamingLog() },
+                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
                         modifier = Modifier.heightIn(min = 48.dp),
                         shape = RoundedCornerShape(14.dp)
                     ) {
-                        Text("Smazat")
+                        Text("Smazat", maxLines = 1, softWrap = false)
                     }
                 }
             }
@@ -427,25 +458,29 @@ private fun ActiveWifiMeshSection(
                         shape = RoundedCornerShape(14.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
                                     text = ev.eventType,
                                     style = MaterialTheme.typography.labelLarge,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.weight(1f)
                                 )
+                                Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = ev.timeText,
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    softWrap = false
                                 )
                             }
                             Text(
-                                text = if (ev.fromNode == "---") "Uzel: ${ev.toNode}" else "${ev.fromNode}  →  ${ev.toNode}",
+                                text = if (ev.fromNode == "---") "Uzel: ${ev.toNode}" else "${ev.fromNode} → ${ev.toNode}",
                                 style = MaterialTheme.typography.bodySmall,
                                 fontWeight = FontWeight.SemiBold
                             )
@@ -480,27 +515,28 @@ private fun ZigbeeInterferenceSection(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Spektrum 2,4 GHz: Wi-Fi vs. Zigbee",
+                        text = "2,4 GHz: Wi-Fi vs. Zigbee",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.ExtraBold
                     )
                     Text(
-                        text = "Sken ze vzduchu (${state.lastScanTimeText}) • IEEE 802.15.4 kanály 11–26",
+                        text = "Sken ${state.lastScanTimeText} • kanály 11 až 26",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+                Spacer(modifier = Modifier.width(8.dp))
                 OutlinedButton(
                     onClick = { controller.triggerWifiScan() },
+                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
                     modifier = Modifier.heightIn(min = 48.dp),
                     shape = RoundedCornerShape(14.dp)
                 ) {
-                    Text("Přeměřit")
+                    Text("Přeměřit", maxLines = 1, softWrap = false)
                 }
             }
 
@@ -510,7 +546,7 @@ private fun ZigbeeInterferenceSection(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "Nejčistší Zigbee kanály v tomto místě: ${state.recommendedZigbeeChannels.joinToString(", ") { "K$it" }}",
+                    text = "Nejčistší Zigbee kanály zde: ${state.recommendedZigbeeChannels.joinToString(", ") { "K$it" }}",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF10B981),
@@ -518,7 +554,6 @@ private fun ZigbeeInterferenceSection(
                 )
             }
 
-            // Sloupcovy graf ruseni pro kanaly 11 az 26
             val primaryCol = MaterialTheme.colorScheme.primary
             val baseTrack = MaterialTheme.colorScheme.surface
             Canvas(
@@ -565,16 +600,16 @@ private fun ZigbeeInterferenceSection(
             }
 
             Text(
-                text = "Klepni na číslo Zigbee kanálu (15, 20, 25 a 26 leží v mezerách mezi Wi-Fi 1 / 6 / 11):",
+                text = "Klepni na Zigbee kanál (15, 20, 25 a 26 leží v mezerách mezi Wi-Fi 1 / 6 / 11):",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            // Dve rady tlacitek 11..18 a 19..26 (dotykova vyska 48 dp)
-            listOf(11..18, 19..26).forEach { range ->
+            // Cista mrizka 4x4 (siroka tlacitka bez zalamovani procent)
+            listOf(11..14, 15..18, 19..22, 23..26).forEach { range ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     for (ch in range) {
                         val sc = state.zigbeeScores.firstOrNull { it.channel == ch }
@@ -588,23 +623,28 @@ private fun ZigbeeInterferenceSection(
                         Box(
                             modifier = Modifier
                                 .weight(1f)
-                                .heightIn(min = 48.dp)
-                                .clip(RoundedCornerShape(12.dp))
+                                .heightIn(min = 50.dp)
+                                .clip(RoundedCornerShape(14.dp))
                                 .background(bg)
-                                .clickable { controller.selectZigbeeChannel(ch) },
+                                .clickable { controller.selectZigbeeChannel(ch) }
+                                .padding(horizontal = 4.dp, vertical = 6.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
-                                    text = "$ch",
+                                    text = "K$ch",
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 13.sp,
-                                    color = fg
+                                    color = fg,
+                                    maxLines = 1,
+                                    softWrap = false
                                 )
                                 Text(
-                                    text = "${sc?.loadPercent ?: 0}%",
-                                    fontSize = 10.sp,
-                                    color = fg.copy(alpha = 0.82f)
+                                    text = "${sc?.loadPercent ?: 0}\u00A0%",
+                                    fontSize = 11.sp,
+                                    color = fg.copy(alpha = 0.85f),
+                                    maxLines = 1,
+                                    softWrap = false
                                 )
                             }
                         }
@@ -630,28 +670,31 @@ private fun ZigbeeInterferenceSection(
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Detail Zigbee kanálu ${selectedScore.channel} (${selectedScore.centerFreqMhz} MHz)",
+                        text = "Zigbee kanál ${selectedScore.channel} (${selectedScore.centerFreqMhz}\u00A0MHz)",
                         style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f)
                     )
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Zátěž ${selectedScore.loadPercent} %",
+                        text = "Zátěž ${selectedScore.loadPercent}\u00A0%",
                         fontWeight = FontWeight.ExtraBold,
-                        color = loadColor
+                        color = loadColor,
+                        maxLines = 1,
+                        softWrap = false
                     )
                 }
 
                 WifiInfoRow(
                     "Pozice ve spektru",
-                    if (selectedScore.isSidebandGap) "Mezera mezi Wi-Fi kanály 1 / 6 / 11 (ideální)" else "Přímý překryv s hlavním lalokem Wi-Fi"
+                    if (selectedScore.isSidebandGap) "Mezera mezi Wi-Fi 1 / 6 / 11 (ideální)" else "Přímý překryv s lalokem Wi-Fi"
                 )
                 WifiInfoRow(
-                    "Nejsilnější 2,4GHz rušič",
-                    selectedScore.strongestInterfererDbm?.let { "$it dBm" } ?: "Žádná rušící Wi-Fi v dosahu"
+                    "Nejsilnější rušič",
+                    selectedScore.strongestInterfererDbm?.let { "$it\u00A0dBm" } ?: "Žádná rušící Wi-Fi v dosahu"
                 )
 
                 if (selectedScore.overlappingApNames.isNotEmpty()) {
@@ -701,7 +744,6 @@ private fun WifiScannerSection(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
@@ -716,12 +758,14 @@ private fun WifiScannerSection(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+                Spacer(modifier = Modifier.width(8.dp))
                 Button(
                     onClick = { controller.triggerWifiScan() },
+                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
                     modifier = Modifier.heightIn(min = 48.dp),
                     shape = RoundedCornerShape(14.dp)
                 ) {
-                    Text("Skenovat")
+                    Text("Skenovat", maxLines = 1, softWrap = false)
                 }
             }
 
@@ -729,7 +773,7 @@ private fun WifiScannerSection(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                listOf("Vše", "2,4 GHz", "5 GHz", "6 GHz").forEachIndexed { idx, label ->
+                listOf("Vše", "2.4G", "5G", "6G").forEachIndexed { idx, label ->
                     SubTabPill(
                         title = label,
                         selected = bandFilter == idx,
@@ -776,10 +820,9 @@ private fun WifiScannerSection(
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column(modifier = Modifier.weight(1f)) {
+                        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             val titleStr = if (ap.alias.isNotBlank()) "${ap.ssid} • ${ap.alias}" else ap.ssid
                             Text(
                                 text = titleStr,
@@ -792,17 +835,22 @@ private fun WifiScannerSection(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
+                        Spacer(modifier = Modifier.width(10.dp))
                         Column(horizontalAlignment = Alignment.End) {
                             Text(
-                                text = "${ap.rssiDbm} dBm",
+                                text = "${ap.rssiDbm}\u00A0dBm",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.ExtraBold,
-                                color = col
+                                color = col,
+                                maxLines = 1,
+                                softWrap = false
                             )
                             Text(
-                                text = "${ap.band.shortLabel} • K${ap.channelNumber} (${ap.channelWidthMhz} MHz)",
+                                text = "${ap.band.shortLabel} • K${ap.channelNumber} (${ap.channelWidthMhz}M)",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.primary,
+                                maxLines = 1,
+                                softWrap = false
                             )
                         }
                     }
@@ -827,7 +875,7 @@ private fun WifiScannerSection(
                             OutlinedTextField(
                                 value = aliasInput,
                                 onValueChange = { aliasInput = it },
-                                placeholder = { Text("Pojmenovat BSSID...") },
+                                placeholder = { Text("Název BSSID...") },
                                 singleLine = true,
                                 shape = RoundedCornerShape(12.dp),
                                 modifier = Modifier.weight(1f)
@@ -837,10 +885,11 @@ private fun WifiScannerSection(
                                     controller.saveBssidAlias(ap.bssid, aliasInput)
                                     editingBssid = null
                                 },
+                                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
                                 modifier = Modifier.heightIn(min = 48.dp),
                                 shape = RoundedCornerShape(12.dp)
                             ) {
-                                Text("Uložit")
+                                Text("Uložit", maxLines = 1, softWrap = false)
                             }
                         }
                     }
@@ -881,12 +930,11 @@ fun SpeedAndPingTab(
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
+                    Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "Měření rychlosti (Speedtest)",
+                            text = "Speedtest",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.ExtraBold
                         )
@@ -896,11 +944,14 @@ fun SpeedAndPingTab(
                             color = MaterialTheme.colorScheme.primary
                         )
                     }
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = if (state.isWifiConnected) "Wi-Fi" else btsState.networkTypeDetail,
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.secondary
+                        color = MaterialTheme.colorScheme.secondary,
+                        maxLines = 1,
+                        softWrap = false
                     )
                 }
 
@@ -910,7 +961,6 @@ fun SpeedAndPingTab(
                     progress = state.speedProgress
                 )
 
-                // Krivka prubehu aktualni faze mereni
                 if (state.speedCurveSamples.size >= 2) {
                     val curveCol = if (state.speedPhase == SpeedTestPhase.UPLOAD) {
                         MaterialTheme.colorScheme.secondary
@@ -934,18 +984,19 @@ fun SpeedAndPingTab(
                     }
                 }
 
+                // Cista mrizka 2x2 pro vysledky Speedtestu
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     WifiMetricBox(
                         title = "Download",
-                        value = "${WifiSpectrumCalculator.formatMbps(state.downloadMbps)} Mbps",
+                        value = "${WifiSpectrumCalculator.formatMbps(state.downloadMbps)}\u00A0Mbps",
                         modifier = Modifier.weight(1f)
                     )
                     WifiMetricBox(
                         title = "Upload",
-                        value = "${WifiSpectrumCalculator.formatMbps(state.uploadMbps)} Mbps",
+                        value = "${WifiSpectrumCalculator.formatMbps(state.uploadMbps)}\u00A0Mbps",
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -955,17 +1006,12 @@ fun SpeedAndPingTab(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     WifiMetricBox(
-                        title = "Klidový Ping",
-                        value = WifiSpectrumCalculator.formatMs(state.speedIdlePingMs),
+                        title = "Klidový / Zátěž Ping",
+                        value = "${WifiSpectrumCalculator.formatMs(state.speedIdlePingMs)} / ${WifiSpectrumCalculator.formatMs(state.speedLoadedPingMs)}",
                         modifier = Modifier.weight(1f)
                     )
                     WifiMetricBox(
-                        title = "Ping v zátěži",
-                        value = WifiSpectrumCalculator.formatMs(state.speedLoadedPingMs),
-                        modifier = Modifier.weight(1f)
-                    )
-                    WifiMetricBox(
-                        title = "Jitter",
+                        title = "Jitter (kolísání)",
                         value = WifiSpectrumCalculator.formatMs(state.speedJitterMs),
                         modifier = Modifier.weight(1f)
                     )
@@ -974,12 +1020,13 @@ fun SpeedAndPingTab(
                 if (isSpeedRunning) {
                     OutlinedButton(
                         onClick = { controller.stopSpeedTest() },
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(min = 52.dp),
                         shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text("Zastavit měření", fontWeight = FontWeight.Bold)
+                        Text("Zastavit měření", fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false)
                     }
                 } else {
                     Button(
@@ -987,12 +1034,19 @@ fun SpeedAndPingTab(
                             val hint = "${btsState.servingCells.firstOrNull()?.operatorName.orEmpty()} (${btsState.networkTypeDetail})".trim()
                             controller.startSpeedTest(hint)
                         },
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(min = 52.dp),
                         shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text("Spustit Speedtest (Download + Upload)", fontWeight = FontWeight.Bold)
+                        Text(
+                            text = "Spustit Speedtest",
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            softWrap = false,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
                 }
             }
@@ -1013,7 +1067,7 @@ fun SpeedAndPingTab(
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Okamžitě odhalí, zda zpoždění vzniká doma na Wi-Fi trase k routeru, nebo až venku u operátora.",
+                    text = "Odhalí, zda zpoždění vzniká doma na Wi-Fi trase k routeru, nebo až venku u operátora.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -1033,10 +1087,11 @@ fun SpeedAndPingTab(
                     )
                     OutlinedButton(
                         onClick = { controller.setInternetPingTarget(targetDraft) },
+                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 12.dp),
                         modifier = Modifier.heightIn(min = 52.dp),
                         shape = RoundedCornerShape(14.dp)
                     ) {
-                        Text("Nastavit")
+                        Text("Nastavit", maxLines = 1, softWrap = false)
                     }
                 }
 
@@ -1056,7 +1111,7 @@ fun SpeedAndPingTab(
                             modifier = Modifier.heightIn(min = 48.dp),
                             shape = RoundedCornerShape(12.dp)
                         ) {
-                            Text(preset, style = MaterialTheme.typography.labelMedium)
+                            Text(preset, style = MaterialTheme.typography.labelMedium, maxLines = 1, softWrap = false)
                         }
                     }
                 }
@@ -1067,19 +1122,26 @@ fun SpeedAndPingTab(
                 ) {
                     Button(
                         onClick = { controller.toggleDualPing() },
+                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
                         modifier = Modifier
                             .weight(1f)
                             .heightIn(min = 48.dp),
                         shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text(if (state.isDualPingRunning) "Zastavit Ping" else "Spustit duální Ping")
+                        Text(
+                            text = if (state.isDualPingRunning) "Zastavit Ping" else "Spustit Ping",
+                            maxLines = 1,
+                            softWrap = false,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
                     OutlinedButton(
                         onClick = { controller.resetPingStats() },
+                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
                         modifier = Modifier.heightIn(min = 48.dp),
                         shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text("Vynulovat")
+                        Text("Vynulovat", maxLines = 1, softWrap = false)
                     }
                 }
 
@@ -1088,7 +1150,7 @@ fun SpeedAndPingTab(
             }
         }
 
-        // Historie namerenych rychlosti
+        // Historie namerenych rychlosti (opraveny radek s tlacitkem Vymazat)
         if (state.speedHistory.isNotEmpty()) {
             Card(
                 shape = RoundedCornerShape(20.dp),
@@ -1096,24 +1158,26 @@ fun SpeedAndPingTab(
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = "Historie měření (${state.speedHistory.size})",
                             style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.weight(1f)
                         )
+                        Spacer(modifier = Modifier.width(8.dp))
                         OutlinedButton(
                             onClick = { controller.clearSpeedHistory() },
+                            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
                             modifier = Modifier.heightIn(min = 48.dp),
                             shape = RoundedCornerShape(14.dp)
                         ) {
-                            Text("Vymazat")
+                            Text("Vymazat", maxLines = 1, softWrap = false)
                         }
                     }
 
@@ -1126,33 +1190,43 @@ fun SpeedAndPingTab(
                             Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
                                         text = item.connectionSummary,
                                         style = MaterialTheme.typography.bodySmall,
-                                        fontWeight = FontWeight.Bold
+                                        fontWeight = FontWeight.Bold,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f)
                                     )
+                                    Spacer(modifier = Modifier.width(8.dp))
                                     Text(
                                         text = item.timeText,
                                         style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        softWrap = false
                                     )
                                 }
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        text = "↓ ${WifiSpectrumCalculator.formatMbps(item.downloadMbps)} Mbps  •  ↑ ${WifiSpectrumCalculator.formatMbps(item.uploadMbps)} Mbps",
+                                        text = "↓ ${WifiSpectrumCalculator.formatMbps(item.downloadMbps)} • ↑ ${WifiSpectrumCalculator.formatMbps(item.uploadMbps)}\u00A0Mbps",
                                         style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.ExtraBold,
-                                        color = MaterialTheme.colorScheme.primary
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.weight(1f)
                                     )
+                                    Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        text = "Ping ${WifiSpectrumCalculator.formatMs(item.idlePingMs)}",
+                                        text = WifiSpectrumCalculator.formatMs(item.idlePingMs),
                                         style = MaterialTheme.typography.labelMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        softWrap = false
                                     )
                                 }
                             }
@@ -1181,7 +1255,7 @@ private fun SpeedometerGauge(
 
     Box(
         modifier = Modifier
-            .size(190.dp)
+            .size(196.dp)
             .padding(top = 4.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -1200,7 +1274,6 @@ private fun SpeedometerGauge(
                 style = Stroke(width = stroke, cap = StrokeCap.Round)
             )
 
-            // Nelinearni stupnice budiku do 1000 Mbps
             val norm = when {
                 mbps <= 0.0 -> 0f
                 mbps <= 100.0 -> (mbps / 100.0).toFloat() * 0.55f
@@ -1223,20 +1296,26 @@ private fun SpeedometerGauge(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = WifiSpectrumCalculator.formatMbps(mbps),
-                fontSize = 36.sp,
+                fontSize = 34.sp,
                 fontWeight = FontWeight.Black,
-                color = activeColor
+                color = activeColor,
+                maxLines = 1,
+                softWrap = false
             )
             Text(
                 text = "Mbps",
                 style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                softWrap = false
             )
             if (progress > 0f && progress < 1f) {
                 Text(
-                    text = "${(progress * 100f).roundToInt()} %",
+                    text = "${(progress * 100f).roundToInt()}\u00A0%",
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1,
+                    softWrap = false
                 )
             }
         }
@@ -1256,48 +1335,58 @@ private fun PingTargetSnapshotCard(snapshot: PingStatsSnapshot) {
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = snapshot.targetLabel,
                         style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = "Host: ${snapshot.targetHost} • Vzorky: ${snapshot.receivedCount}/${snapshot.sentCount}",
+                        text = "Host: ${snapshot.targetHost} • ${snapshot.receivedCount}/${snapshot.sentCount}",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = WifiSpectrumCalculator.formatMs(snapshot.lastMs),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.ExtraBold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1,
+                    softWrap = false
                 )
             }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Text(
-                    text = "Průměr: ${WifiSpectrumCalculator.formatMs(snapshot.avgMs)}",
-                    style = MaterialTheme.typography.bodySmall
-                )
-                Text(
-                    text = "Jitter: ${WifiSpectrumCalculator.formatMs(snapshot.jitterMs)}",
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    text = "Ztráta: ${snapshot.lossPercent} %",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (snapshot.lossPercent > 0) Color(0xFFEF4444) else Color(0xFF10B981),
-                    fontWeight = FontWeight.Bold
-                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Průměr", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, softWrap = false)
+                    Text(WifiSpectrumCalculator.formatMs(snapshot.avgMs), style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold, maxLines = 1, softWrap = false)
+                }
+                Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("Jitter", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, softWrap = false)
+                    Text(WifiSpectrumCalculator.formatMs(snapshot.jitterMs), style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold, maxLines = 1, softWrap = false)
+                }
+                Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
+                    Text("Ztráta", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, softWrap = false)
+                    Text(
+                        text = "${snapshot.lossPercent}\u00A0%",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (snapshot.lossPercent > 0) Color(0xFFEF4444) else Color(0xFF10B981),
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        softWrap = false
+                    )
+                }
             }
 
             if (snapshot.recentSamplesMs.isNotEmpty()) {
@@ -1322,11 +1411,7 @@ private fun PingTargetSnapshotCard(snapshot: PingStatsSnapshot) {
                             )
                         } else {
                             val h = ((sample / maxMs).coerceIn(0.12f, 1f)) * (size.height - 6f)
-                            val col = when {
-                                sample < 25f -> Color(0xFF10B981)
-                                sample < 70f -> Color(0xFFF59E0B)
-                                else -> Color(0xFFEF4444)
-                            }
+                            val col =流速Color(sample)
                             drawRoundRect(
                                 color = col,
                                 topLeft = Offset(x, size.height - h),
@@ -1341,6 +1426,14 @@ private fun PingTargetSnapshotCard(snapshot: PingStatsSnapshot) {
     }
 }
 
+private fun 流速Color(sampleMs: Float): Color {
+    return when {
+        sampleMs < 25f -> Color(0xFF10B981)
+        sampleMs < 70f -> Color(0xFFF59E0B)
+        else -> Color(0xFFEF4444)
+    }
+}
+
 @Composable
 private fun WifiRssiChartCard(samples: List<WifiRssiSample>) {
     Card(
@@ -1349,40 +1442,46 @@ private fun WifiRssiChartCard(samples: List<WifiRssiSample>) {
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             val minVal = samples.minOfOrNull { it.rssiDbm }
             val maxVal = samples.maxOfOrNull { it.rssiDbm }
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = "Vývoj Wi-Fi signálu (60 s)",
                     style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f)
                 )
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = if (minVal != null && maxVal != null) "$minVal až $maxVal dBm" else "---",
+                    text = if (minVal != null && maxVal != null) "$minVal až $maxVal\u00A0dBm" else "---",
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1,
+                    softWrap = false
                 )
             }
 
             val lineCol = MaterialTheme.colorScheme.secondary
-            val gridCol = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f)
+            val gridCol = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.22f)
 
             Canvas(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(115.dp)
+                    .height(126.dp)
             ) {
-                val topDbm = -35f
+                val padY = 8.dp.toPx()
+                val usableH = (size.height - padY * 2f).coerceAtLeast(10f)
+                val topDbm = -20f
                 val bottomDbm = -95f
                 val span = topDbm - bottomDbm
 
-                listOf(-50f, -67f, -80f).forEach { ref ->
-                    val y = ((topDbm - ref) / span) * size.height
+                listOf(-35f, -58f, -80f).forEach { ref ->
+                    val y = padY + ((topDbm - ref) / span) * usableH
                     drawLine(gridCol, Offset(0f, y), Offset(size.width, y), strokeWidth = 1.5f)
                 }
 
@@ -1392,11 +1491,20 @@ private fun WifiRssiChartCard(samples: List<WifiRssiSample>) {
                     samples.forEachIndexed { idx, s ->
                         val cl = s.rssiDbm.toFloat().coerceIn(bottomDbm, topDbm)
                         val x = idx * stepX
-                        val y = ((topDbm - cl) / span) * size.height
+                        val y = padY + ((topDbm - cl) / span) * usableH
                         if (idx == 0) p.moveTo(x, y) else p.lineTo(x, y)
                     }
                     drawPath(p, color = lineCol, style = Stroke(width = 5f, cap = StrokeCap.Round))
                 }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("-20\u00A0dBm (u AP)", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, softWrap = false)
+                Text("-60\u00A0dBm", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, softWrap = false)
+                Text("-95\u00A0dBm", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, softWrap = false)
             }
         }
     }
@@ -1417,7 +1525,7 @@ fun SubTabPill(
             .clip(RoundedCornerShape(16.dp))
             .background(bg)
             .clickable(onClick = onClick)
-            .padding(horizontal = 8.dp),
+            .padding(horizontal = 6.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -1426,6 +1534,7 @@ fun SubTabPill(
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.Bold,
             maxLines = 1,
+            softWrap = false,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center
         )
@@ -1443,6 +1552,8 @@ private fun BadgeTag(text: String, color: Color) {
             color = color,
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            softWrap = false,
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
         )
     }
@@ -1460,14 +1571,16 @@ private fun WifiMetricBox(
         color = MaterialTheme.colorScheme.surface
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp),
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Ellipsis
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
@@ -1475,6 +1588,7 @@ private fun WifiMetricBox(
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
+                softWrap = false,
                 overflow = TextOverflow.Ellipsis
             )
         }
@@ -1485,7 +1599,6 @@ private fun WifiMetricBox(
 private fun WifiInfoRow(label: String, value: String) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Top
     ) {
         Text(
@@ -1494,10 +1607,12 @@ private fun WifiInfoRow(label: String, value: String) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.weight(0.42f)
         )
+        Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.End,
             modifier = Modifier.weight(0.58f)
         )
     }

@@ -6,6 +6,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -45,6 +47,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
 private val DarkPalette = darkColorScheme(
@@ -122,6 +125,8 @@ fun App() {
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Medium,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
                         )
                     }
@@ -147,7 +152,7 @@ fun App() {
                                             modifier = Modifier.weight(1f)
                                         )
                                         SubTabPill(
-                                            title = "Okolní buňky (${btsState.neighborCells.size})",
+                                            title = "Okolí (${btsState.neighborCells.size})",
                                             selected = btsSubView == 1,
                                             onClick = { btsSubView = 1 },
                                             modifier = Modifier.weight(1f)
@@ -176,7 +181,7 @@ fun App() {
                     val navLabels = listOf(
                         "BTS",
                         "Wi-Fi",
-                        "Test sítě",
+                        "Test",
                         "Mapa",
                         "Trasa"
                     )
@@ -191,7 +196,14 @@ fun App() {
                                     tint = if (active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             },
-                            label = { Text(label, maxLines = 1) }
+                            label = {
+                                Text(
+                                    text = label,
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
                         )
                     }
                 }
@@ -216,18 +228,19 @@ private fun TopAnalyzerBar(
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "BTS Radar PM",
                     style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.ExtraBold
+                    fontWeight = FontWeight.ExtraBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 val subtitle = if ((selectedTab == 1 || selectedTab == 2) && wifiState.isWifiConnected && wifiState.activeWifi != null) {
                     val aw = wifiState.activeWifi
-                    "${aw.ssid} • ${aw.band.shortLabel} K${aw.channelNumber} • ${aw.rssiDbm} dBm"
+                    "${aw.ssid} • ${aw.band.shortLabel} K${aw.channelNumber} • ${aw.rssiDbm}\u00A0dBm"
                 } else {
                     val caTag = if (btsState.isCarrierAggregation) " • CA" else ""
                     "${btsState.networkTypeDetail}$caTag • ${btsState.lastUpdatedText}"
@@ -235,25 +248,31 @@ private fun TopAnalyzerBar(
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
+
+            Spacer(modifier = Modifier.width(10.dp))
 
             if (selectedTab == 1) {
                 OutlinedButton(
                     onClick = { wifiController.triggerWifiScan() },
+                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
                     modifier = Modifier.heightIn(min = 48.dp),
                     shape = RoundedCornerShape(16.dp)
                 ) {
-                    Text("Sken Wi-Fi")
+                    Text("Sken Wi-Fi", maxLines = 1, softWrap = false)
                 }
             } else {
                 OutlinedButton(
                     onClick = { btsController.refreshNow() },
+                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
                     modifier = Modifier.heightIn(min = 48.dp),
                     shape = RoundedCornerShape(16.dp)
                 ) {
-                    Text("Obnovit")
+                    Text("Obnovit", maxLines = 1, softWrap = false)
                 }
             }
         }
@@ -270,18 +289,20 @@ private fun TopAnalyzerBar(
                     if (isSelected) {
                         Button(
                             onClick = { btsController.selectSimSubscription(slot.subId) },
+                            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
                             modifier = Modifier.heightIn(min = 48.dp),
                             shape = RoundedCornerShape(16.dp)
                         ) {
-                            Text("SIM ${slot.slotIndex}: ${slot.carrierName}")
+                            Text("SIM ${slot.slotIndex}: ${slot.carrierName}", maxLines = 1, softWrap = false)
                         }
                     } else {
                         OutlinedButton(
                             onClick = { btsController.selectSimSubscription(slot.subId) },
+                            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
                             modifier = Modifier.heightIn(min = 48.dp),
                             shape = RoundedCornerShape(16.dp)
                         ) {
-                            Text("SIM ${slot.slotIndex}: ${slot.carrierName}")
+                            Text("SIM ${slot.slotIndex}: ${slot.carrierName}", maxLines = 1, softWrap = false)
                         }
                     }
                 }
@@ -298,7 +319,6 @@ private fun MainNavCanvasIcon(index: Int, tint: Color) {
         val stroke = Stroke(width = 2.3f * density, cap = StrokeCap.Round)
         when (index) {
             0 -> {
-                // Carky mobilniho signalu
                 val bars = listOf(0.32f, 0.54f, 0.76f, 1.0f)
                 bars.forEachIndexed { i, ratio ->
                     val x = w * (0.16f + i * 0.22f)
@@ -306,18 +326,15 @@ private fun MainNavCanvasIcon(index: Int, tint: Color) {
                 }
             }
             1 -> {
-                // Oblouky Wi-Fi
                 drawArc(tint, startAngle = 215f, sweepAngle = 110f, useCenter = false, topLeft = Offset(w * 0.08f, h * 0.16f), size = Size(w * 0.84f, h * 0.84f), style = stroke)
                 drawArc(tint, startAngle = 215f, sweepAngle = 110f, useCenter = false, topLeft = Offset(w * 0.24f, h * 0.36f), size = Size(w * 0.52f, h * 0.52f), style = stroke)
                 drawCircle(tint, radius = w * 0.09f, center = Offset(w * 0.5f, h * 0.78f))
             }
             2 -> {
-                // Budik rychlosti (Speedtest)
                 drawArc(tint, startAngle = 150f, sweepAngle = 240f, useCenter = false, topLeft = Offset(w * 0.1f, h * 0.14f), size = Size(w * 0.8f, h * 0.8f), style = stroke)
                 drawLine(tint, Offset(w * 0.5f, h * 0.56f), Offset(w * 0.76f, h * 0.30f), strokeWidth = 2.4f * density, cap = StrokeCap.Round)
             }
             3 -> {
-                // Stozar BTS na mape
                 val p = Path().apply {
                     moveTo(w * 0.5f, h * 0.12f)
                     lineTo(w * 0.2f, h * 0.88f)
@@ -330,7 +347,6 @@ private fun MainNavCanvasIcon(index: Int, tint: Color) {
                 drawCircle(tint, radius = w * 0.11f, center = Offset(w * 0.5f, h * 0.15f))
             }
             else -> {
-                // Zaznam trasy
                 for (i in 0..2) {
                     val y = h * (0.24f + i * 0.26f)
                     drawLine(tint, Offset(w * 0.15f, y), Offset(w * 0.88f, y), strokeWidth = 2.4f * density, cap = StrokeCap.Round)
@@ -370,12 +386,13 @@ private fun PermissionRequestCard(onGrantClick: () -> Unit) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Button(
                     onClick = onGrantClick,
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(min = 52.dp),
                     shape = RoundedCornerShape(18.dp)
                 ) {
-                    Text("Povolit a spustit analyzátor", fontWeight = FontWeight.Bold)
+                    Text("Povolit a spustit analyzátor", fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false)
                 }
                 FooterCopyright()
             }
