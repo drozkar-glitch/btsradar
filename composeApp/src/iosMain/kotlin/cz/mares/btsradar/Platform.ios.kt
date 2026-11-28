@@ -39,6 +39,31 @@ actual fun rememberBtsScannerController(): BtsScannerController {
 }
 
 @Composable
+actual fun rememberWifiNetController(): WifiNetController {
+    return remember {
+        val initialScores = WifiSpectrumCalculator.analyzeZigbeeChannels(emptyList(), null)
+        object : WifiNetController {
+            override val state: StateFlow<WifiNetState> = MutableStateFlow(
+                WifiNetState(
+                    zigbeeScores = initialScores,
+                    statusBanner = "Wi-Fi a RF analyzátor je určen pro Android"
+                )
+            )
+            override fun triggerWifiScan() = Unit
+            override fun saveBssidAlias(bssid: String, alias: String) = Unit
+            override fun clearRoamingLog() = Unit
+            override fun selectZigbeeChannel(channel: Int) = Unit
+            override fun setInternetPingTarget(host: String) = Unit
+            override fun toggleDualPing() = Unit
+            override fun resetPingStats() = Unit
+            override fun startSpeedTest(connectionHint: String) = Unit
+            override fun stopSpeedTest() = Unit
+            override fun clearSpeedHistory() = Unit
+        }
+    }
+}
+
+@Composable
 actual fun BtsMapView(
     state: BtsRadarState,
     modifier: Modifier
